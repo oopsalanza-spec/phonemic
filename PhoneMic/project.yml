@@ -1,23 +1,31 @@
 name: PhoneMic
+
 options:
-  bundleIdPrefix: com.yourname.phonemic
+  bundleIdPrefix: com.oopsalanza
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "16.0"
+
 targets:
   PhoneMic:
     type: application
     platform: iOS
-    sources: [Sources/PhoneMic]
+    sources:
+      - path: Sources/PhoneMic
+        excludes:
+          - Info.plist
+
     info:
       path: Sources/PhoneMic/Info.plist
       properties:
-        UIBackgroundModes: [audio]
+        UIBackgroundModes:
+          - audio
         NSMicrophoneUsageDescription: "PhoneMic needs microphone access to stream your voice to your PC."
         UILaunchScreen: {}
         UIRequiresFullScreen: false
+
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.phonemic
+        PRODUCT_BUNDLE_IDENTIFIER: com.oopsalanza.phonemic
         CODE_SIGNING_ALLOWED: NO
         CODE_SIGNING_REQUIRED: NO
         MARKETING_VERSION: "1.0"
