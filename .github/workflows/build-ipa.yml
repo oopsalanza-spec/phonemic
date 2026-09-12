@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - "Sources/PhoneMic/**"
-      - "project.yml"
+      - "PhoneMic/Sources/PhoneMic/**"
+      - "PhoneMic/project.yml"
       - ".github/workflows/build-ipa.yml"
 
 jobs:
@@ -18,22 +18,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show repository structure
+      - name: Verify files
         run: |
-          echo "Current directory:"
+          echo "Repository:"
           pwd
 
           echo ""
-          echo "Root files:"
-          ls -la
+          echo "PhoneMic contents:"
+          ls -la PhoneMic
 
           echo ""
-          echo "project.yml:"
-          cat project.yml
+          echo "Source files:"
+          find PhoneMic/Sources/PhoneMic -maxdepth 2 -type f -print
 
           echo ""
-          echo "Sources:"
-          find Sources -maxdepth 3 -type f -print
+          echo "Checking project.yml:"
+          test -f PhoneMic/project.yml
+          echo "project.yml FOUND"
 
       - name: Install XcodeGen
         run: |
@@ -41,38 +42,26 @@ jobs:
           xcodegen version
 
       - name: Generate Xcode project
+        working-directory: PhoneMic
         run: |
           rm -rf PhoneMic.xcodeproj
-
-          xcodegen generate \
-            --spec project.yml \
-            --project PhoneMic.xcodeproj
+          xcodegen generate --spec project.yml
 
       - name: Verify Xcode project
+        working-directory: PhoneMic
         run: |
-          echo "Checking generated project..."
-
-          if [ ! -d "PhoneMic.xcodeproj" ]; then
-            echo "ERROR: PhoneMic.xcodeproj was NOT generated."
-            echo ""
-            echo "Current directory:"
-            pwd
-            echo ""
-            echo "Files:"
-            find . -maxdepth 3 -type f | sort
-            exit 1
-          fi
-
-          echo "SUCCESS: PhoneMic.xcodeproj exists."
-          ls -la PhoneMic.xcodeproj
+          test -d PhoneMic.xcodeproj
+          echo "PhoneMic.xcodeproj FOUND"
 
       - name: List schemes
+        working-directory: PhoneMic
         run: |
           xcodebuild \
             -project PhoneMic.xcodeproj \
             -list
 
       - name: Build unsigned app
+        working-directory: PhoneMic
         run: |
           xcodebuild \
             -project PhoneMic.xcodeproj \
@@ -85,18 +74,15 @@ jobs:
             build
 
       - name: Verify app
+        working-directory: PhoneMic
         run: |
-          if [ ! -d "build/Build/Products/Release-iphoneos/PhoneMic.app" ]; then
-            echo "ERROR: PhoneMic.app was not created."
-            exit 1
-          fi
-
-          echo "SUCCESS: PhoneMic.app created."
+          test -d build/Build/Products/Release-iphoneos/PhoneMic.app
+          echo "PhoneMic.app FOUND"
 
       - name: Package IPA
+        working-directory: PhoneMic
         run: |
           rm -rf Payload PhoneMic.ipa
-
           mkdir Payload
 
           cp -R \
@@ -109,4 +95,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PhoneMic-ipa
-          path: PhoneMic.ipa
+          path: PhoneMic/PhoneMic.ipa
