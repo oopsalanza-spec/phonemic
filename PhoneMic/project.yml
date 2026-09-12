@@ -1,0 +1,26 @@
+name: PhoneMic
+options:
+  bundleIdPrefix: com.yourname.phonemic
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  PhoneMic:
+    type: application
+    platform: iOS
+    sources: [Sources/PhoneMic]
+    info:
+      path: Sources/PhoneMic/Info.plist
+      properties:
+        UIBackgroundModes: [audio]
+        NSMicrophoneUsageDescription: "PhoneMic needs microphone access to stream your voice to your PC."
+        UILaunchScreen: {}
+        UIRequiresFullScreen: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.phonemic
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
