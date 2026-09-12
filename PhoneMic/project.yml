@@ -2,9 +2,11 @@ name: PhoneMic
 
 options:
   bundleIdPrefix: com.oopsalanza
+  xcodeVersion: "15.4"
+  projectFormat: xcode15_3
+
   deploymentTarget:
     iOS: "16.0"
-  xcodeVersion: "15.4"
 
 targets:
   PhoneMic:
