@@ -18,11 +18,59 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Show repository structure
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Root files:"
+          ls -la
+
+          echo ""
+          echo "project.yml:"
+          cat project.yml
+
+          echo ""
+          echo "Sources:"
+          find Sources -maxdepth 3 -type f -print
+
       - name: Install XcodeGen
-        run: brew install xcodegen
+        run: |
+          brew install xcodegen
+          xcodegen version
 
       - name: Generate Xcode project
-        run: xcodegen generate
+        run: |
+          rm -rf PhoneMic.xcodeproj
+
+          xcodegen generate \
+            --spec project.yml \
+            --project PhoneMic.xcodeproj
+
+      - name: Verify Xcode project
+        run: |
+          echo "Checking generated project..."
+
+          if [ ! -d "PhoneMic.xcodeproj" ]; then
+            echo "ERROR: PhoneMic.xcodeproj was NOT generated."
+            echo ""
+            echo "Current directory:"
+            pwd
+            echo ""
+            echo "Files:"
+            find . -maxdepth 3 -type f | sort
+            exit 1
+          fi
+
+          echo "SUCCESS: PhoneMic.xcodeproj exists."
+          ls -la PhoneMic.xcodeproj
+
+      - name: List schemes
+        run: |
+          xcodebuild \
+            -project PhoneMic.xcodeproj \
+            -list
 
       - name: Build unsigned app
         run: |
@@ -36,10 +84,25 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build
 
+      - name: Verify app
+        run: |
+          if [ ! -d "build/Build/Products/Release-iphoneos/PhoneMic.app" ]; then
+            echo "ERROR: PhoneMic.app was not created."
+            exit 1
+          fi
+
+          echo "SUCCESS: PhoneMic.app created."
+
       - name: Package IPA
         run: |
-          mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/PhoneMic.app Payload/PhoneMic.app
+          rm -rf Payload PhoneMic.ipa
+
+          mkdir Payload
+
+          cp -R \
+            build/Build/Products/Release-iphoneos/PhoneMic.app \
+            Payload/PhoneMic.app
+
           zip -r PhoneMic.ipa Payload
 
       - name: Upload IPA
